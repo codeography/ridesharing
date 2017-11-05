@@ -1,74 +1,99 @@
 #include <bits/stdc++.h>
-
-
 using namespace std;
+class Point{
+public:
+	int x,y;
+	int dest;
 
-int distance(pair<int, int> p1, pair<int, int> p2) {
-	return (abs(p1.first-p2.first)+abs(p1.second-p2.second));
+	Point(int x, int y) {
+		this->x = x;
+		this->y = y;
+	}
+
+	Point(int x, int y, Point dest) {
+		this->x = x;
+		this->y = y;
+		this->dest = abs(this->x-dest.x)+abs(this->y-dest.y);
+	}
+};
+struct paths{
+    int dist;
+    int pass[4];
+};
+bool vis[10];
+vector<Point> P;
+int dist(class Point p1,class Point p2){
+    return abs(p1.x-p2.x)+abs(p1.y-p2.y);
+}
+int findmin(int k){
+    int min=INT_MAX,it=0;
+    for(int i=0,d;i<10;i++){
+        if(!vis[i]){
+            d=dist(P[k],P[i]);
+     //   cout<<"---"<<d<<endl;
+        if(d+P[i].dest<min){
+            min=d+P[i].dest;
+            it=i;
+        }
+        }
+    }
+    return it;
 }
 
-int compare(pair<pair<int, int>, int > a, pair<pair<int, int>, int > b) {
-	return a.second<b.second;
+bool comp(struct paths a,struct paths b){
+    return a.dist<b.dist;
 }
-
-
 int main() {
-	vector<pair<pair<int, int>, int> > p;
-	
 
 	srand(time(NULL));
 
-	int x,y,md;
+	Point D(rand()%30,rand()%30);
+	D.dest=0;
 
+	cout << "Destination:" <<endl;
+	cout<<"("<<D.x<<','<<D.y <<")"<<'\t'<<D.dest<< endl;
+	cout<<endl<<"Passengers"<<endl;
 
-	pair<int,int> c(rand()%30,rand()%30), d(rand()%30,rand()%30);
-
-	for(int i=0;i<10;i++) {
+	for(int i=0;i<10;i++){
+		int x, y;
 		x=rand()%30;
 		y=rand()%30;
-		pair<int, int> pt(x,y);
-		md= ::distance(pt,c);
-		pair<pair<int, int>, int> p1(pt,md);
-		p.push_back(p1);
-		//cout << "(" << x << ", " <<y<<")" <<endl;
+		if(x==D.x &&y==D.y){
+		    i--;
+		    continue;
+		}
+		Point p(x,y,D);
+		P.push_back(p);
 	}
 
-	sort(p.begin(),p.end(),compare);
-
-	cout<<"cab"<<endl;
-	cout<<"("<<c.first<<","<<c.second<<")"<<endl;
-
-
-	cout<<"passengers"<<endl;
-	for(int i=0;i<p.size();i++) {
-		cout<<"(" << (p[i].first).first << "," << (p[i].first).second << ")" << "\t- " << p[i].second << endl;
+	for(vector<Point>::iterator it=P.begin();it!=P.end();it++) {
+		cout<<"("<<it->x<<','<<it->y <<")"<<'\t'<<it->dest<< endl;
 	}
-
-	cout<<"destination"<<endl;
-
-	cout<<endl<<"("<<d.first<<","<<d.second<<")"<<endl;
-
-	for(int i=30;i>=0;i--) {
-		for(int j=0;j<30;j++) {
-			bool passenger=false;
-			if(j==c.first && i==c.second) cout << "C  ";
-			else {
-			for(int k=0;k<p.size();k++) {
-				pair<int,int> q(j,i);
-				if( q == p[k].first) {
-					cout << "P  ";
-					passenger=true;
-				}
-			}
-			if(!passenger) cout << ".  ";
-			}
-			
+	paths o[10];
+	for(int i=0;i<10;i++){
+	    memset(vis,false,10);
+	    vis[i]=true;
+	    int n=3,j=i,k,d=0;
+	    o[i].pass[0]=i;
+	    while(n--){
+	        k=findmin(j);
+	        vis[k]=true;
+	        d+=dist(P[j],P[k]);
+	        o[i].pass[3-n]=k;
+	        j=k;
+	      //  cout<<k<<endl;
+	    }
+	    d+=dist(P[k],D);
+	    o[i].dist=d;
 	}
-	cout<<endl;
-	}
+    
+    sort(o,o+10,comp);
+    for(int i=0;i<10;i++){
+        cout<<o[i].dist<<endl;
+        for(int j=0;j<4;j++)
+            cout<<"--->"<<o[i].pass[j]<<"  ";
+        cout<<endl;
+    }
+	return 0;
 
-
-
-	
 }
-
